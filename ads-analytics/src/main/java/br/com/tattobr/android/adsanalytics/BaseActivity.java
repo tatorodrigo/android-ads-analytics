@@ -1,5 +1,6 @@
 package br.com.tattobr.android.adsanalytics;
 
+import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -9,6 +10,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 
 public abstract class BaseActivity extends AppCompatActivity {
+    private final String SI_SHOW_INTERSTITIAL_AD = "br.com.tattobr.android.adsanalytics.SI_SHOW_INTERSTITIAL_AD";
     private AdView mAdView;
     private boolean mShowInterstitialAd;
     private boolean mSetupAdsCalled;
@@ -34,6 +36,20 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         }
         return isShowing;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mShowInterstitialAd = savedInstanceState != null && savedInstanceState.getBoolean(SI_SHOW_INTERSTITIAL_AD);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(SI_SHOW_INTERSTITIAL_AD, mShowInterstitialAd);
     }
 
     @Override
