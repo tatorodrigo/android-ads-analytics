@@ -5,82 +5,32 @@ import android.app.Application;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 public abstract class BaseApplication extends Application {
-    public static GoogleAnalytics analytics;
-    public static Tracker tracker;
+    public static FirebaseAnalytics analytics;
     private InterstitialAd mInterstitialAd;
     private String mLastAdUnitId;
 
-    protected abstract String getAnalyticsTrackingId();
     public abstract AdRequest createDefaultAdRequest();
 
-    /**
-     * Use to set analytics.setLocalDispatchPeriod().
-     *
-     * Defaults to 1800.
-     *
-     * @return
-     */
-    protected int getAnalyticsDispatchPeriodInSeconds() {
-        return 1800;
-    }
-
-    /**
-     * Use to set analytics.setDryRun()
-     *
-     * Defaults to false
-     *
-     * @return true: do not send analytics data. false: send analytics data
-     */
-    protected boolean getAnalyticsDryRun() {
-        return false;
-    }
-
-    /**
-     * Use to set tracker.enableExceptionReporting()
-     *
-     * @return
-     */
-    protected boolean getTrackerEnableExceptionReporting() {
-        return true;
-    }
-
-    /**
-     * Use to set tracker.enableAdvertisingIdCollection()
-     * @return
-     */
-    protected boolean getTrackerEnableAdvertisingIdCollection() {
-        return true;
-    }
-
-    /**
-     * Use to set tracker.enableAutoActivityTracking()
-     *
-     * @return
-     */
-    protected boolean getTrackerEnableAutoActivityTracking() {
-        return true;
-    }
+    public abstract String getApplicationCode();
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        analytics = GoogleAnalytics.getInstance(this);
-        analytics.setLocalDispatchPeriod(getAnalyticsDispatchPeriodInSeconds());
-        analytics.setDryRun(getAnalyticsDryRun());
+        analytics = FirebaseAnalytics.getInstance(this);
 
-        tracker = analytics.newTracker(getAnalyticsTrackingId());
-        tracker.enableExceptionReporting(getTrackerEnableExceptionReporting());
-        tracker.enableAdvertisingIdCollection(getTrackerEnableAdvertisingIdCollection());
-        tracker.enableAutoActivityTracking(getTrackerEnableAutoActivityTracking());
+        String applicationCode = getApplicationCode();
+        if (applicationCode != null && !applicationCode.isEmpty()) {
+            MobileAds.initialize(getApplicationContext(), applicationCode);
+        }
     }
 
     public void setupInterstitialAd(String adUnitId) {
-        if(adUnitId != null && !adUnitId.equals(mLastAdUnitId)) {
+        if (adUnitId != null && !adUnitId.equals(mLastAdUnitId)) {
             mLastAdUnitId = adUnitId;
             mInterstitialAd = new InterstitialAd(this);
             mInterstitialAd.setAdUnitId(adUnitId);
