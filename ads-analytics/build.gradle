@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/tatorodrigo/android-ads-analytics'
     gitUrl = 'https://github.com/tatorodrigo/android-ads-analytics.git'
 
-    libraryVersion = '0.1.21'
+    libraryVersion = '0.2.2'
 
     developerId = 'tatorodrigo'
     developerName = 'Rodrigo Tatto'
@@ -25,13 +25,13 @@ ext {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 28
+        minSdkVersion 16
+        targetSdkVersion 30
         versionCode 1
-        versionName "0.1.21"
+        versionName "0.2.2"
     }
     buildTypes {
         release {
@@ -48,7 +48,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.browser:browser:1.2.0'
     implementation 'com.google.firebase:firebase-core:18.0.0'
-    implementation 'com.google.firebase:firebase-ads:19.5.1'
+    implementation 'com.google.android.gms:play-services-ads:19.5.0'
     testImplementation 'junit:junit:4.13.1'
 }
 

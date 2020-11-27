@@ -1,5 +1,6 @@
 package br.com.tattobr.android.adsanalytics;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -98,6 +99,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
     protected final void setupAds() {
         if (!mSetupAdsCalled) {
             mSetupAdsCalled = true;

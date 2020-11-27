@@ -1,11 +1,16 @@
 package br.com.tattobr.android.adsanalytics;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
+
+import androidx.annotation.RequiresPermission;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 public abstract class BaseApplication extends Application {
@@ -17,6 +22,7 @@ public abstract class BaseApplication extends Application {
 
     public abstract String getApplicationCode();
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -25,7 +31,11 @@ public abstract class BaseApplication extends Application {
 
         String applicationCode = getApplicationCode();
         if (applicationCode != null && !applicationCode.isEmpty()) {
-            MobileAds.initialize(getApplicationContext(), applicationCode);
+            MobileAds.initialize(getApplicationContext(), new OnInitializationCompleteListener() {
+                @Override
+                public void onInitializationComplete(InitializationStatus initializationStatus) {
+                }
+            });
         }
     }
 
@@ -46,6 +56,7 @@ public abstract class BaseApplication extends Application {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void requestNewInterstitial() {
         AdRequest adRequest = createDefaultAdRequest();
         mInterstitialAd.loadAd(adRequest);
