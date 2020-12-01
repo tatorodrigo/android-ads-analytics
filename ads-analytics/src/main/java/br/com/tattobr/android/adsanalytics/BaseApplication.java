@@ -3,8 +3,6 @@ package br.com.tattobr.android.adsanalytics;
 import android.annotation.SuppressLint;
 import android.app.Application;
 
-import androidx.annotation.RequiresPermission;
-
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;

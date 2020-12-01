@@ -4,17 +4,24 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import androidx.appcompat.app.AppCompatActivity;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.LoadAdError;
 
 public abstract class BaseActivity extends AppCompatActivity {
     private final String SI_SHOW_INTERSTITIAL_AD = "br.com.tattobr.android.adsanalytics.SI_SHOW_INTERSTITIAL_AD";
     private final String LAST_INTERSTITIAL_AD_MILIS = "br.com.tattobr.android.adsanalytics.LAST_INTERSTITIAL_AD_MILIS";
+    private ViewGroup adContainerView;
     private AdView mAdView;
     private boolean mShowInterstitialAd;
     private boolean mSetupAdsCalled;
@@ -27,6 +34,13 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @return
      */
     public abstract String getIntersticialAdUnitId();
+
+    /**
+     * The AdUnitId to be loaded or null to not load at all
+     *
+     * @return
+     */
+    public abstract String getBannerAdUnitId();
 
     protected abstract long getInterstitialAdMilisInterval();
 
@@ -75,11 +89,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         if (mAdView != null) {
             mAdView.pause();
         }
+
+        super.onPause();
     }
 
     @Override
@@ -103,25 +117,18 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected final void setupAds() {
         if (!mSetupAdsCalled) {
             mSetupAdsCalled = true;
-            mAdView = (AdView) findViewById(R.id.adView);
-            if (mAdView != null) {
-                AdRequest adRequest = createDefaultAdRequest();
+            adContainerView = findViewById(R.id.ad_view_container);
 
-                mAdView.setAdListener(new AdListener() {
+            if (adContainerView != null) {
+                adContainerView.post(new Runnable() {
                     @Override
-                    public void onAdFailedToLoad(int errorCode) {
-                        super.onAdFailedToLoad(errorCode);
-
-                        if (errorCode == AdRequest.ERROR_CODE_NETWORK_ERROR) {
-                            mAdView.setVisibility(View.GONE);
-                        }
+                    public void run() {
+                        loadBanner();
                     }
                 });
-                mAdView.loadAd(adRequest);
             }
 
             String adUnitId = getIntersticialAdUnitId();
-
             if (adUnitId != null) {
                 BaseApplication application = (BaseApplication) getApplication();
                 if (application != null) {
@@ -131,9 +138,62 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
+    private void loadBanner() {
+        String adUnitId = getBannerAdUnitId();
+        if (adUnitId != null && !adUnitId.isEmpty()) {
+            // Create an ad request.
+            mAdView = new AdView(this);
+            mAdView.setAdUnitId(adUnitId);
+            adContainerView.removeAllViews();
+            adContainerView.addView(mAdView);
+
+            AdSize adSize = getAdSize();
+            mAdView.setAdSize(adSize);
+
+            AdRequest adRequest = createDefaultAdRequest();
+
+            mAdView.setAdListener(new AdListener() {
+                @Override
+                public void onAdFailedToLoad(LoadAdError loadAdError) {
+                    super.onAdFailedToLoad(loadAdError);
+                    // old loadAdError.getCode() == AdRequest.ERROR_CODE_NETWORK_ERROR
+                    mAdView.setVisibility(View.GONE);
+                    adContainerView.setVisibility(View.GONE);
+                }
+            });
+
+            mAdView.loadAd(adRequest);
+        } else {
+            adContainerView.setVisibility(View.GONE);
+        }
+    }
+
+    private AdSize getAdSize() {
+        // Determine the screen width (less decorations) to use for the ad width.
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float density = outMetrics.density;
+
+        float adWidthPixels = adContainerView.getWidth();
+
+        // If the ad hasn't been laid out, default to the full screen width.
+        if (adWidthPixels == 0) {
+            adWidthPixels = outMetrics.widthPixels;
+        }
+
+        int adWidth = (int) (adWidthPixels / density);
+
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
+    }
+
     private AdRequest createDefaultAdRequest() {
         BaseApplication application = (BaseApplication) getApplication();
-        return application != null ? application.createDefaultAdRequest() : null;
+        return application != null ?
+                application.createDefaultAdRequest() :
+                new AdRequest.Builder().build();
     }
 
     private boolean isInterstitialAdAllowedByTime() {
