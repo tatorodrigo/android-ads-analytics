@@ -34,6 +34,7 @@ public abstract class BaseApplication extends Application {
             MobileAds.initialize(getApplicationContext(), new OnInitializationCompleteListener() {
                 @Override
                 public void onInitializationComplete(InitializationStatus initializationStatus) {
+                    onMobileAdsInitializationComplete(initializationStatus);
                 }
             });
         }
@@ -54,6 +55,10 @@ public abstract class BaseApplication extends Application {
 
             requestNewInterstitial();
         }
+    }
+
+    protected void onMobileAdsInitializationComplete(InitializationStatus initializationStatus) {
+
     }
 
     @SuppressLint("MissingPermission")
