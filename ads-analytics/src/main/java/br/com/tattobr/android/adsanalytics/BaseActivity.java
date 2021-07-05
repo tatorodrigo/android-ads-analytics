@@ -9,18 +9,19 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.LoadAdError;
 
 public abstract class BaseActivity extends AppCompatActivity {
     private final String SI_SHOW_INTERSTITIAL_AD = "br.com.tattobr.android.adsanalytics.SI_SHOW_INTERSTITIAL_AD";
-    private final String LAST_INTERSTITIAL_AD_MILIS = "br.com.tattobr.android.adsanalytics.LAST_INTERSTITIAL_AD_MILIS";
+    private final String LAST_INTERSTITIAL_AD_MILLIS = "br.com.tattobr.android.adsanalytics.LAST_INTERSTITIAL_AD_MILLIS";
     private ViewGroup adContainerView;
     private AdView mAdView;
     private boolean mShowInterstitialAd;
@@ -31,30 +32,30 @@ public abstract class BaseActivity extends AppCompatActivity {
     /**
      * The AdUnitId to be loaded or null to not load at all
      *
-     * @return
+     * @return the interstitial adUnitId
      */
-    public abstract String getIntersticialAdUnitId();
+    public abstract String getInterstitialAdUnitId();
 
     /**
      * The AdUnitId to be loaded or null to not load at all
      *
-     * @return
+     * @return the banner adUnitId
      */
     public abstract String getBannerAdUnitId();
 
-    protected abstract long getInterstitialAdMilisInterval();
+    protected abstract long getInterstitialAdMillisInterval();
 
     public boolean showInterstitialAd(boolean persistOnResume) {
         BaseApplication application = (BaseApplication) getApplication();
         boolean isShowing = false;
         if (application != null) {
             InterstitialAd interstitialAd = application.getInterstitialAd();
-            if (isInterstitialAdAllowedByTime() && interstitialAd != null && interstitialAd.isLoaded()) {
+            if (isInterstitialAdAllowedByTime() && interstitialAd != null) {
                 mShowInterstitialAd = false;
                 mSharedPreferences.edit().putLong(
-                        LAST_INTERSTITIAL_AD_MILIS, System.currentTimeMillis()
+                        LAST_INTERSTITIAL_AD_MILLIS, System.currentTimeMillis()
                 ).apply();
-                interstitialAd.show();
+                interstitialAd.show(BaseActivity.this);
                 isShowing = true;
             } else {
                 mShowInterstitialAd = persistOnResume;
@@ -72,7 +73,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean(SI_SHOW_INTERSTITIAL_AD, mShowInterstitialAd);
@@ -128,7 +129,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 });
             }
 
-            String adUnitId = getIntersticialAdUnitId();
+            String adUnitId = getInterstitialAdUnitId();
             if (adUnitId != null) {
                 BaseApplication application = (BaseApplication) getApplication();
                 if (application != null) {
@@ -198,8 +199,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private boolean isInterstitialAdAllowedByTime() {
         long currentTimeMillis = System.currentTimeMillis();
-        long lastInterstitialAdDate = mSharedPreferences.getLong(LAST_INTERSTITIAL_AD_MILIS, 0l);
+        long lastInterstitialAdDate = mSharedPreferences.getLong(LAST_INTERSTITIAL_AD_MILLIS, 0l);
         return lastInterstitialAdDate == 0l || lastInterstitialAdDate > currentTimeMillis ||
-                currentTimeMillis - lastInterstitialAdDate > getInterstitialAdMilisInterval();
+                currentTimeMillis - lastInterstitialAdDate > getInterstitialAdMillisInterval();
     }
 }
