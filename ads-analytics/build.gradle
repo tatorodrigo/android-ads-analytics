@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/tatorodrigo/android-ads-analytics'
     gitUrl = 'https://github.com/tatorodrigo/android-ads-analytics.git'
 
-    libraryVersion = '0.2.3'
+    libraryVersion = '0.2.4'
 
     developerId = 'tatorodrigo'
     developerName = 'Rodrigo Tatto'
@@ -31,7 +31,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName "0.2.3"
+        versionName "0.2.4"
     }
     buildTypes {
         release {
